@@ -28,7 +28,7 @@ mouse_joystick_interface:
         scale: 1.0
 
     joint_topic: "/joint_target_sliders"
-    joint_axis_count: 6
+    joint_axis_count: 7
     joint_axes:
       joint_1:
         index: 0
@@ -47,6 +47,9 @@ mouse_joystick_interface:
         scale: 1.0
       joint_6:
         index: 5
+        scale: 1.0
+      joint_7:
+        index: 6
         scale: 1.0
 
     joint_states_topic: "/joint_states"

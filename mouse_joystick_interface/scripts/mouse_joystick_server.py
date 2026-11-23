@@ -36,7 +36,8 @@ from std_msgs.msg import String
 _OUTPUT_TYPE_JOY = 'joy'
 _OUTPUT_TYPE_JOINT  = 'joint'
 _JOY_BUTTON_COUNT = 12
-_JOINT_SLIDER_COUNT = 6
+_JOINT_SLIDER_COUNT = 7
+_SUPPORTED_JOINT_SLIDER_COUNTS = (6, 7)
 _JOY_BUTTON_TYPE_PRESS = 'press'
 _JOY_BUTTON_TYPE_TOGGLE = 'toggle'
 _SUPPORTED_JOY_BUTTON_TYPES = (_JOY_BUTTON_TYPE_PRESS, _JOY_BUTTON_TYPE_TOGGLE)
@@ -106,10 +107,10 @@ def _validate_joy_buttons(buttons: object) -> list[int]:
 
 
 def _validate_joint_sliders(sliders: object) -> list[float]:
-    """Return a validated six-entry joint slider array."""
-    if not isinstance(sliders, list) or len(sliders) != _JOINT_SLIDER_COUNT:
+    """Return a validated joint slider array for a six- or seven-joint robot."""
+    if not isinstance(sliders, list) or len(sliders) not in _SUPPORTED_JOINT_SLIDER_COUNTS:
         raise ValueError(
-            f'sliders must be a list of exactly {_JOINT_SLIDER_COUNT} entries'
+            'sliders must be a list of exactly 6 or 7 entries'
         )
 
     if any(

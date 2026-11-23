@@ -8,7 +8,20 @@ from unittest.mock import Mock
 
 from sensor_msgs.msg import Joy
 
-from mouse_joystick_server import MouseJoystickInterface, _TeleopHandler, _build_runtime_config
+from mouse_joystick_server import (
+    MouseJoystickInterface,
+    _TeleopHandler,
+    _build_runtime_config,
+    _validate_joint_sliders,
+)
+
+
+def test_joint_sliders_accept_six_or_seven_positions():
+    six_positions = [0.0] * 6
+    seven_positions = [0.0] * 7
+
+    assert _validate_joint_sliders(six_positions) == six_positions
+    assert _validate_joint_sliders(seven_positions) == seven_positions
 
 
 def test_runtime_config_always_includes_button_settings():

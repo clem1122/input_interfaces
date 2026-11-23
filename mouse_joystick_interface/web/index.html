@@ -151,6 +151,16 @@
       gap: 0.2rem;
     }
 
+    .joint-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .joint-group[hidden] {
+      display: none;
+    }
+
     .joint-value {
       font-size: medium;
       color: black;
@@ -342,6 +352,24 @@
       </div>
       <input class="joint-value" type="number" value="0" step="1" aria-label="Joint 6 position in degrees">
     </div>
+
+    <div id="joint-7-group" class="joint-group">
+      <div class="joint-title">
+        <h3>Joint 7</h3>
+        <button type="button" class="joint-refresh-button" data-joint-index="6"
+          aria-label="Refresh Joint 7 position">Refresh</button>
+      </div>
+      <div class="joint-control">
+        <div class="joint-track">
+          <input class="joint-slider" type="range" value="0" min="-166" max="166" step="1">
+          <span class="joint-marker" aria-hidden="true" hidden></span>
+        </div>
+        <input class="joint-value" type="number" value="0" step="1" aria-label="Joint 7 position in degrees">
+      </div>
+    </div>
+
+    
+
     <button id="joint-button" class="joint-button" aria-pressed="false">GO</button>
   </div>
 
@@ -357,6 +385,7 @@
     const jointSliderElements = Array.from(document.querySelectorAll('.joint-slider'));
     const jointValueElements = Array.from(document.querySelectorAll('.joint-value'));
     const jointMarkerElements = Array.from(document.querySelectorAll('.joint-marker'));
+    const joint7Group = document.getElementById('joint-7-group');
     const jointGoButton = document.getElementById('joint-button');
     const jointRefreshButtons = Array.from(document.querySelectorAll('.joint-refresh-button'));
     const jointRefreshAllButton = document.getElementById('joint-refresh-all-button');
@@ -373,7 +402,8 @@
     let layoutReduced = false;
     let layoutReady = false;
     const joyButtonState = Array(12).fill(0);
-    const jointSlidersState = Array(6).fill(0);
+    const jointSlidersState = Array(7).fill(0);
+    let activeJointCount = 7;
     const activePressPointers = new Map();
     let robotPosition = null;
     let JointGoButtonState = false;
@@ -410,7 +440,7 @@
       fetch('/teleop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ x, y, buttons: joyButtonState, sliders: jointSlidersState, JointGoButton: JointGoButtonState }),
+        body: JSON.stringify({ x, y, buttons: joyButtonState, sliders: jointSlidersState.slice(0, activeJointCount), JointGoButton: JointGoButtonState }),
         keepalive: true
       }).catch(() => { });
     }
@@ -609,7 +639,7 @@
 
     function setJointSlidersState() {
 
-      for (let index = 0; index < jointSlidersState.length; index++) {
+      for (let index = 0; index < jointSliderElements.length; index++) {
         jointSlidersState[index] = Number(jointSliderElements[index].value) / 180 * 3.14;
 
       }
@@ -722,6 +752,13 @@
         })
         .then((state) => {
           robotPosition = state.robot_position;
+          const jointCount = Object.keys(robotPosition ?? {})
+            .filter((name) => /^joint_[1-7]$/.test(name)).length;
+          if (jointCount === 6 || jointCount === 7) {
+            activeJointCount = jointCount;
+            joint7Group.hidden = jointCount === 6;
+          }
+
           jointSliderElements.forEach((slider, index) => {
             const marker = jointMarkerElements[index];
             const positionRadians = robotPosition?.[`joint_${index + 1}`];
