@@ -1,7 +1,7 @@
 # mouse_joystick_interface
 
 `mouse_joystick_interface` serves a browser-based two-axis joystick and publishes
-its normalized coordinates and buttons as a `sensor_msgs/msg/Joy` message.
+its normalized coordinates, buttons and 6/7 joints control sliders as a `sensor_msgs/msg/Joy` message.
 
 ## Installation
 
@@ -100,7 +100,16 @@ legacy `/joystick_mapper/active_mode`. With `start_mapper:=false`, set
 `active_mode_topic` in the interface YAML to the external mapper's topic.
 The separate Interaction button controls Click/Mouseover as before.
 
+The joint sliders enable joint control. Based on the size of the topic payload 
+`/joint_states`, it displays 6 or 7 sliders. Each label has a target handle as 
+well as a visual witness of the current joint position. Each label has its `Refresh` 
+button to reset the handle to the current joint position. The `Refresh all` button 
+refreshes all sliders. Holding the `GO` button sends the command until release. All
+the values are in degrees and rounded to the nearest integer.
+
 ## Output configuration
+
+### Output type : JOY
 
 The node publishes timestamped `sensor_msgs/msg/Joy` messages on `joy_topic`.
 The web UI displays twelve configurable buttons mapped to indexes `0` through
@@ -122,16 +131,16 @@ press controls retain the rectangular blue-active design.
 
 The joystick uses the following mapping parameters:
 
-| Parameter | Default | Meaning |
-| --- | --- | --- |
-| `joy_axis_count` | `2` | Size of the published `axes` array. |
-| `joy_axes.x.index` | `0` | Axis receiving the browser `x` value. |
-| `joy_axes.x.scale` | `1.0` | Multiplier applied to browser `x`. |
-| `joy_axes.y.index` | `1` | Axis receiving the browser `y` value. |
-| `joy_axes.y.scale` | `1.0` | Multiplier applied to browser `y`. |
-| `joy_buttons.button_<0-11>.type` | `press` | Per-button `press` or `toggle` behavior. |
-| `joy_buttons.width_px` | `89` | Desired width of each button in CSS pixels. |
-| `joy_buttons.height_px` | `44` | Minimum button height in CSS pixels. |
+| Parameter                        | Default | Meaning                                     |
+| -------------------------------- | ------- | ------------------------------------------- |
+| `joy_axis_count`                 | `2`     | Size of the published `axes` array.         |
+| `joy_axes.x.index`               | `0`     | Axis receiving the browser `x` value.       |
+| `joy_axes.x.scale`               | `1.0`   | Multiplier applied to browser `x`.          |
+| `joy_axes.y.index`               | `1`     | Axis receiving the browser `y` value.       |
+| `joy_axes.y.scale`               | `1.0`   | Multiplier applied to browser `y`.          |
+| `joy_buttons.button_<0-11>.type` | `press` | Per-button `press` or `toggle` behavior.    |
+| `joy_buttons.width_px`           | `89`    | Desired width of each button in CSS pixels. |
+| `joy_buttons.height_px`          | `44`    | Minimum button height in CSS pixels.        |
 
 Button dimensions must be positive integers and are loaded at startup. The
 whole interface scales down on small screens; long labels can make
@@ -143,3 +152,17 @@ The node rejects non-positive array sizes, duplicate or out-of-range indexes,
 and non-finite scales at startup. Joy HTTP payloads must contain exactly twelve
 integer button values, each `0` or `1`; omitting the field defaults every button
 to zero for backward compatibility. Unsupported button types are rejected at startup.
+
+### Output type : JOINT
+
+The node pulishes timestamped `sensor_msgs/msg/Joy` messages on `/joint_target_sliders`.
+
+The sliders uses the following mapping parameters:
+
+| Parameter                      | Default | Meaning                             |
+| ------------------------------ | ------- | ----------------------------------- |
+| `joint_axis_count`             | `7`     | Size of the published `axes` array. |
+| `joint_axes.joint_<1-7>.index` | `<0-6>` | Axis receiving the slider value.    |
+| `joint_axes.joint_<1-7>.scale` | `1.0`   | Multiplier applied to slider value. |
+| `joint_go_button`              | `0`     | `0` : released ; `1` : pressed      |
+
