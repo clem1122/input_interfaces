@@ -354,6 +354,7 @@ class MouseJoystickInterface(Node):
         self.declare_parameter('joystick_diameter_px', 400)
         self.declare_parameter('joy_topic', '/joy')
         self.declare_parameter('joint_topic', '/joint_target_sliders')
+        self.declare_parameter('joint_states_topic', '/joint_states')
         self.declare_parameter('joy_axis_count', 2)
         self.declare_parameter('joy_axes.x.index', 0)
         self.declare_parameter('joy_axes.x.scale', 1.0)
@@ -411,7 +412,7 @@ class MouseJoystickInterface(Node):
         )
         self.robot_position_sub_ = self.create_subscription(
             JointState,
-            '/joint_states',
+            self.get_parameter('joint_states_topic').value,
             self._robot_position_callback,
             qos_profile_sensor_data,
         )
